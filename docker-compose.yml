@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  structurizr:
+    image: structurizr/lite:latest
+    container_name: structurizr-lite
+    ports:
+      - "8080:8080"
+    volumes:
+      - structurizr_data:/usr/local/structurizr
+    restart: unless-stopped
+
+  uploader:
+    build: ./uploader
+    container_name: uploader
+    ports:
+      - "5000:5000"
+    volumes:
+      - structurizr_data:/usr/local/structurizr
+    restart: unless-stopped
+
+volumes:
+  structurizr_data:
