@@ -18,18 +18,20 @@ destination = "/usr/local/structurizr"
 
 csrf = CSRFProtect(app)
 
-def validate_dsl_file(form, field):
+
+def validate_dsl_file(form, field: FileField):
     if field.data:
         filename = field.data.filename
         if not is_allowed_file(filename):
             raise ValidationError('File must have a .dsl extension')
-
+    
 class UploadForm(FlaskForm):
     file = FileField('File', validators=[
         FileRequired(message='Please select a file to upload'),
         validate_dsl_file
     ])
-    
+
+
 
 def is_allowed_file(filename: str)->bool:
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'dsl'}
@@ -103,7 +105,6 @@ def upload():
 
         return redirect('/')
     
-    # If form validation failed, return to the form with errors
     return redirect('/')
 
 @app.route('/set-current/<filename>', methods=['POST'])
@@ -181,4 +182,4 @@ def index():
                           current_active_file=current_active_file)
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", debug=False)
+    app.run(host="0.0.0.0", debug=True)
