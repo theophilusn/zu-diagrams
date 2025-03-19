@@ -4,6 +4,9 @@ import shutil
 import filecmp
 from flask import Flask, request, redirect, render_template, jsonify, url_for
 from flask_wtf.csrf import CSRFProtect
+from flask_wtf import FlaskForm
+from wtforms import FileField
+from wtforms.validators import FileRequired
 
 
 app = Flask(__name__)
@@ -14,6 +17,10 @@ destination = "/usr/local/structurizr"
 
 
 csrf = CSRFProtect(app)
+
+class UploadForm(FlaskForm):
+    file = FileField('File', validators=[FileRequired()])
+    
 
 def is_allowed_file(filename: str)->bool:
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'dsl'}
@@ -59,9 +66,11 @@ def get_current_active_file():
 
 @app.route('/upload', methods=['POST'])
 def upload():
-    file = request.files['file']
-    if not (file and is_allowed_file(file.filename)):
-        return 'Invalid file', 400
+    form = UploadForm()
+    if form.validate_on_submit():
+        file = form.file.data
+        if not (file and is_allowed_file(file.filename)):
+            return 'Invalid file', 400
 
     if request.content_length > app.config['MAX_CONTENT_LENGTH']:
         return 'File too large', 413

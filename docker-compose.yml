@@ -1,7 +1,6 @@
 services:
   structurizr:
     image: structurizr/lite:latest
-    container_name: structurizr-lite
     volumes:
       - structurizr_data:/usr/local/structurizr
     restart: unless-stopped
@@ -10,7 +9,6 @@ services:
 
   uploader:
     build: ./uploader
-    container_name: uploader
     volumes:
       - structurizr_data:/usr/local/structurizr
     restart: unless-stopped
