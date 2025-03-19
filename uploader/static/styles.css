@@ -1,19 +1,38 @@
 /* Base styles */
+:root {
+  --primary-color: #007bff;
+  --primary-hover: #0056b3;
+  --secondary-color: #4eb4e7;
+  --secondary-hover: #2f96c0;
+  --success-color: #28a745;
+  --danger-color: #dc3545;
+  --danger-hover: #bd2130;
+  --light-bg: #f8f9fa;
+  --border-color: #ddd;
+  --text-color: #555;
+  --light-text: #6c757d;
+}
+
 body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
+  line-height: 1.5;
 }
 
-/* Header styles */
+/* Typography */
+h1, h2 {
+  margin-bottom: 1rem;
+}
+
+/* Layout */
 .header {
-  background-color: #f8f9fa;
+  background-color: var(--light-bg);
   padding: 1rem;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border-color);
   text-align: center;
 }
 
-/* Main layout */
 main {
   display: flex;
   justify-content: center;
@@ -33,9 +52,18 @@ main {
 .instructions {
   text-align: center;
   margin-bottom: 1.5rem;
-  color: #555;
+  color: var(--text-color);
   max-width: 600px;
   align-self: center;
+}
+
+/* No uploads message */
+.no-uploads {
+  text-align: center;
+  padding: 2rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  margin-top: 2rem;
 }
 
 /* Form elements */
@@ -46,12 +74,17 @@ main {
   margin-bottom: 1rem;
 }
 
+.form-group {
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
 input {
   margin-bottom: 1rem;
 }
 
 input[type="file"]::file-selector-button {
-  background-color: #4eb4e7;
+  background-color: var(--secondary-color);
   color: white;
   padding: 0.5rem 1rem;
   border: none;
@@ -61,12 +94,12 @@ input[type="file"]::file-selector-button {
 }
 
 input[type="file"]::file-selector-button:hover {
-  background-color: #2f96c0;
+  background-color: var(--secondary-hover);
 }
 
 button {
   padding: 0.5rem 1rem;
-  background-color: #007bff;
+  background-color: var(--primary-color);
   color: white;
   border: none;
   border-radius: 0.5rem;
@@ -75,7 +108,13 @@ button {
 }
 
 button:hover {
-  background-color: #0056b3;
+  background-color: var(--primary-hover);
+}
+
+.form-error {
+  color: var(--danger-color);
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
 }
 
 /* Message styles */
@@ -100,20 +139,36 @@ button:hover {
   border: 1px solid #f5c6cb;
 }
 
-/* No uploads message */
-.no-uploads {
-  text-align: center;
-  padding: 2rem;
-  border: 1px solid #ddd;
+#operation-message {
+  padding: 0.75rem;
   border-radius: 0.5rem;
-  margin-top: 2rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  display: none;
+  width: 100%;
+}
+
+.operation-success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.operation-error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.hidden {
+  display: none;
 }
 
 /* Previous uploads section */
 .previous-uploads {
   width: 100%;
   margin-top: 2rem;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid var(--border-color);
   padding-top: 1.5rem;
 }
 
@@ -132,7 +187,7 @@ button:hover {
 
 /* Upload item styling */
 .upload-item {
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 0.5rem;
   margin-bottom: 1rem;
   width: 100%;
@@ -140,7 +195,7 @@ button:hover {
 }
 
 .upload-item.active-file {
-  border: 2px solid #28a745;
+  border: 2px solid var(--success-color);
   box-shadow: 0 0 5px rgba(40, 167, 69, 0.3);
 }
 
@@ -148,9 +203,9 @@ button:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap:1rem;
+  gap: 1rem;
   padding: 0.75rem 1rem;
-  background-color: #f8f9fa;
+  background-color: var(--light-bg);
   cursor: pointer;
   font-weight: bold;
   list-style: none;
@@ -161,7 +216,7 @@ button:hover {
 }
 
 .active-badge {
-  background-color: #28a745;
+  background-color: var(--success-color);
   color: white;
   padding: 0.2rem 0.5rem;
   border-radius: 0.25rem;
@@ -171,16 +226,54 @@ button:hover {
 }
 
 .timestamp {
-  color: #6c757d;
+  color: var(--light-text);
   font-size: 0.85rem;
   font-weight: normal;
+}
+
+.file-actions {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.action-btn {
+  font-size: 0.8rem;
+  padding: 0.2rem 0.5rem;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.set-current-btn {
+  background-color: var(--secondary-color);
+  color: white;
+}
+
+.set-current-btn:hover {
+  background-color: var(--secondary-hover);
+}
+
+.delete-btn {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+.delete-btn:hover {
+  background-color: var(--danger-hover);
+}
+
+.disabled-btn {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* File preview styling */
 .file-preview {
   padding: 1rem;
-  background-color: #f8f9fa;
-  border-top: 1px solid #ddd;
+  background-color: var(--light-bg);
+  border-top: 1px solid var(--border-color);
   overflow-x: auto;
 }
 
@@ -192,79 +285,8 @@ button:hover {
 }
 
 .more-indicator {
-  color: #6c757d;
+  color: var(--light-text);
   font-style: italic;
   margin-top: 0.5rem;
   font-size: 0.85rem;
 }
-
-/* Typography */
-h1,
-h2 {
-  margin-bottom: 1rem;
-}
-
-.hidden {
-  display: none;
-}
-
-/* Inline styles for action buttons */
-.file-actions {
-    display: flex;
-    gap: 10px;
-    margin-left: auto;
-  }
-  
-  .action-btn {
-    font-size: 0.8rem;
-    padding: 0.2rem 0.5rem;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-  }
-  
-  .set-current-btn {
-    background-color: #4eb4e7;
-    color: white;
-  }
-  
-  .set-current-btn:hover {
-    background-color: #2f96c0;
-  }
-  
-  .delete-btn {
-    background-color: #dc3545;
-    color: white;
-  }
-  
-  .delete-btn:hover {
-    background-color: #bd2130;
-  }
-  
-  .disabled-btn {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-  
-  /* Message box for operation results */
-  #operation-message {
-    margin-bottom: 1rem;
-    padding: 0.75rem;
-    border-radius: 4px;
-    text-align: center;
-    width: 100%;
-    display: none;
-  }
-  
-  .operation-success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-  }
-  
-  .operation-error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-  }

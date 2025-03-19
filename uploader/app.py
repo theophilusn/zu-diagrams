@@ -6,7 +6,7 @@ from flask import Flask, request, redirect, render_template, jsonify, url_for
 from flask_wtf.csrf import CSRFProtect
 from flask_wtf import FlaskForm
 from wtforms import FileField
-from wtforms.validators import FileRequired
+from wtforms.validators import FileRequired, ValidationError
 
 
 app = Flask(__name__)
@@ -18,8 +18,17 @@ destination = "/usr/local/structurizr"
 
 csrf = CSRFProtect(app)
 
+def validate_dsl_file(form, field):
+    if field.data:
+        filename = field.data.filename
+        if not is_allowed_file(filename):
+            raise ValidationError('File must have a .dsl extension')
+
 class UploadForm(FlaskForm):
-    file = FileField('File', validators=[FileRequired()])
+    file = FileField('File', validators=[
+        FileRequired(message='Please select a file to upload'),
+        validate_dsl_file
+    ])
     
 
 def is_allowed_file(filename: str)->bool:
@@ -69,29 +78,32 @@ def upload():
     form = UploadForm()
     if form.validate_on_submit():
         file = form.file.data
-        if not (file and is_allowed_file(file.filename)):
-            return 'Invalid file', 400
+        
+        # Check file size (this is also handled by Flask's MAX_CONTENT_LENGTH)
+        if request.content_length > app.config['MAX_CONTENT_LENGTH']:
+            return 'File too large', 413
+        
+        # Create uploads directory if it doesn't exist
+        os.makedirs('uploads', exist_ok=True)
+        upload_path = os.path.join('uploads', file.filename)
+        file.save(upload_path)
 
-    if request.content_length > app.config['MAX_CONTENT_LENGTH']:
-        return 'File too large', 413
+        try:
+            workspace_path = os.path.join(destination, 'workspace.dsl')
+            if os.path.exists(workspace_path):
+                now = datetime.datetime.now()
+                timestamp = now.strftime("%Y-%m-%d-%H-%M-%S")
+                backup_name = f"workspace-{timestamp}.dsl"
+                backup_path = os.path.join('uploads', backup_name)
+
+                shutil.copy2(workspace_path, backup_path)
+            shutil.copy2(upload_path, workspace_path)
+        except Exception as exception:
+            return f"An error occurred: {exception}", 500
+
+        return redirect('/')
     
-    os.makedirs('uploads', exist_ok=True)
-    upload_path = os.path.join('uploads', file.filename)
-    file.save(upload_path)
-
-    try:
-        workspace_path = os.path.join(destination, 'workspace.dsl')
-        if os.path.exists(workspace_path):
-            now = datetime.datetime.now()
-            timestamp = now.strftime("%Y-%m-%d-%H-%M-%S")
-            backup_name = f"workspace-{timestamp}.dsl"
-            backup_path = os.path.join('uploads', backup_name)
-
-            shutil.copy2(workspace_path, backup_path)
-        shutil.copy2(upload_path, workspace_path)
-    except Exception as exception:
-        return f"An error occurred: {exception}", 500
-
+    # If form validation failed, return to the form with errors
     return redirect('/')
 
 @app.route('/set-current/<filename>', methods=['POST'])
@@ -144,8 +156,9 @@ def delete_upload(filename):
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
-@app.route('/')
+@app.route('/', methods=['GET'])
 def index():
+    form = UploadForm()
     previous_uploads = get_previous_uploads()
     file_previews = {}
     current_active_file = get_current_active_file()
@@ -162,9 +175,10 @@ def index():
         }
     
     return render_template('base.html', 
+                          form=form,
                           previous_uploads=previous_uploads, 
                           file_previews=file_previews,
                           current_active_file=current_active_file)
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", debug=True)
+    app.run(host="0.0.0.0", debug=False)
