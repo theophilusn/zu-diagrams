@@ -16,7 +16,7 @@
         <article class="instructions">
           <h2>Upload your <code>.dsl</code> file</h2>
           <p>Upload your C4 diagram DSL file to visualize your architecture.</p>
-          <p>The file should be in the correct DSL format with a <code>.dsl</code> extension.</p>
+          <p>The file should be in the correct DSL format with a <code>.dsl</code> extension. (max 5MB)</p>
           <p>Please do not upload any <code>.dsl</code> files that require documentation.</p>
         </article>
         
@@ -30,6 +30,7 @@
           </div>
           
           <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
+            {{ form.csrf_token }}
             <input type="file" name="file" id="file" accept=".dsl" required />
             <button type="submit">Upload</button>
           </form>
@@ -38,6 +39,9 @@
         {% if previous_uploads %}
         <section class="previous-uploads">
           <h2>Previous Uploads</h2>
+          
+          <!-- Operations result message -->
+          <div id="operation-message"></div>
           
           {% if current_active_file %}
           <div class="current-file-info">
@@ -54,6 +58,24 @@
                 <span class="active-badge">ACTIVE</span>
                 {% endif %}
                 <span class="timestamp">{{ file_previews[filename].timestamp }}</span>
+                
+               
+                <div class="file-actions">
+                  <button 
+                    class="action-btn set-current-btn {% if file_previews[filename].is_active %}disabled-btn{% endif %}" 
+                    data-filename="{{ filename }}"
+                    {% if file_previews[filename].is_active %}disabled{% endif %}
+                    onclick="setAsCurrent('{{ filename }}', event)">
+                    Set as Current
+                  </button>
+                  <button 
+                    class="action-btn delete-btn {% if file_previews[filename].is_active %}disabled-btn{% endif %}" 
+                    data-filename="{{ filename }}"
+                    {% if file_previews[filename].is_active %}disabled{% endif %}
+                    onclick="deleteFile('{{ filename }}', event)">
+                    Delete
+                  </button>
+                </div>
               </summary>
               <div class="file-preview">
                 <pre>{{ file_previews[filename].content }}</pre>
@@ -79,7 +101,6 @@
         const form = document.getElementById('upload-form');
         const successMessage = document.getElementById('success-message');
         const errorMessage = document.getElementById('error-message');
-        
         
         form.addEventListener('submit', function(e) {
           e.preventDefault();
@@ -110,6 +131,128 @@
           });
         });
       });
+      
+      // Set a file as the current workspace file
+      function setAsCurrent(filename, event) {
+        // Prevent the details element from toggling
+        event.stopPropagation();
+        
+        
+        if (event.target.classList.contains('disabled-btn')) {
+          return;
+        }
+        
+        fetch(`/set-current/${filename}`, {
+          method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+          const messageEl = document.getElementById('operation-message');
+          
+          if (data.success) {
+            
+            messageEl.textContent = `Success: ${data.message}`;
+            messageEl.className = 'operation-success';
+            
+            
+            setTimeout(() => {
+              window.location.reload();
+            }, 1500);
+          } else {
+            
+            messageEl.textContent = `Error: ${data.message}`;
+            messageEl.className = 'operation-error';
+          }
+          
+          messageEl.style.display = 'block';
+          
+          
+          setTimeout(() => {
+            messageEl.style.display = 'none';
+          }, 3000);
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          
+          
+          const messageEl = document.getElementById('operation-message');
+          messageEl.textContent = 'Error: Failed to set as current file';
+          messageEl.className = 'operation-error';
+          messageEl.style.display = 'block';
+          
+          
+          setTimeout(() => {
+            messageEl.style.display = 'none';
+          }, 3000);
+        });
+      }
+      
+      // Delete a file
+      function deleteFile(filename, event) {
+        // Prevent the details element from toggling
+        event.stopPropagation();
+        
+        
+        if (event.target.classList.contains('disabled-btn')) {
+          return;
+        }
+        
+        
+        if (!confirm(`Are you sure you want to delete ${filename}?`)) {
+          return;
+        }
+        
+        fetch(`/delete-upload/${filename}`, {
+          method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+          const messageEl = document.getElementById('operation-message');
+          
+          if (data.success) {
+            
+            messageEl.textContent = `Success: ${data.message}`;
+            messageEl.className = 'operation-success';
+            
+            
+            const fileItem = event.target.closest('.upload-item');
+            fileItem.remove();
+            
+            // If no more files, reload the page
+            const filesList = document.querySelector('.uploads-list');
+            if (filesList.children.length === 0) {
+              setTimeout(() => {
+                window.location.reload();
+              }, 1500);
+            }
+          } else {
+            
+            messageEl.textContent = `Error: ${data.message}`;
+            messageEl.className = 'operation-error';
+          }
+          
+          messageEl.style.display = 'block';
+          
+          
+          setTimeout(() => {
+            messageEl.style.display = 'none';
+          }, 3000);
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          
+          
+          const messageEl = document.getElementById('operation-message');
+          messageEl.textContent = 'Error: Failed to delete file';
+          messageEl.className = 'operation-error';
+          messageEl.style.display = 'block';
+          
+         
+          setTimeout(() => {
+            messageEl.style.display = 'none';
+          }, 3000);
+        });
+      }
     </script>
   </body>
 </html>
