@@ -4,30 +4,73 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>C4 Diagram Uploader</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
   </head>
   <body>
+    <header class="header">
+      <h1>C4 Diagram Uploader</h1>
+    </header>
+    
     <main>
-      <div>
-        <h1>Upload your <code>.dsl</code> file</h1>
-        
-        <div class="instructions">
+      <div class="container">
+        <article class="instructions">
+          <h2>Upload your <code>.dsl</code> file</h2>
           <p>Upload your C4 diagram DSL file to visualize your architecture.</p>
           <p>The file should be in the correct DSL format with a <code>.dsl</code> extension.</p>
-          <p>Please do not update any <code>.dsl</code> files that require documentation.</p>
-        </div>
+          <p>Please do not upload any <code>.dsl</code> files that require documentation.</p>
+        </article>
         
-        <div id="success-message" class="message success-message">
-          File uploaded successfully! Redirecting to workspace...
-        </div>
-        
-        <div id="error-message" class="message error-message">
-          Upload failed. Please try again or check your file format.
-        </div>
-        
-        <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
-          <input type="file" name="file" id="file" accept=".dsl" required />
-          <button type="submit">Upload</button>
-        </form>
+        <section class="upload-form-container">
+          <div id="success-message" class="message success-message hidden">
+            File uploaded successfully! Redirecting to workspace...
+          </div>
+          
+          <div id="error-message" class="message error-message hidden">
+            Upload failed. Please try again or check your file format.
+          </div>
+          
+          <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" id="file" accept=".dsl" required />
+            <button type="submit">Upload</button>
+          </form>
+        </section>
+
+        {% if previous_uploads %}
+        <section class="previous-uploads">
+          <h2>Previous Uploads</h2>
+          
+          {% if current_active_file %}
+          <div class="current-file-info">
+            <p>Currently active file: <strong>{{ current_active_file }}</strong></p>
+          </div>
+          {% endif %}
+          
+          <div class="uploads-list">
+            {% for filename in previous_uploads %}
+            <details class="upload-item {% if file_previews[filename].is_active %}active-file{% endif %}">
+              <summary class="upload-header">
+                <span class="filename">{{ filename }}</span>
+                {% if file_previews[filename].is_active %}
+                <span class="active-badge">ACTIVE</span>
+                {% endif %}
+                <span class="timestamp">{{ file_previews[filename].timestamp }}</span>
+              </summary>
+              <div class="file-preview">
+                <pre>{{ file_previews[filename].content }}</pre>
+                {% if file_previews[filename].has_more %}
+                <div class="more-indicator">... (more content available)</div>
+                {% endif %}
+              </div>
+            </details>
+            {% endfor %}
+          </div>
+        </section>
+        {% else %}
+        <section class="no-uploads">
+          <h2>You are currently using the default <code>.dsl</code> file.</h2>
+          <p>No uploads yet. Upload a <code>.dsl</code> file to get started.</p>
+        </section>
+        {% endif %}
       </div>
     </main>
 
@@ -37,9 +80,6 @@
         const successMessage = document.getElementById('success-message');
         const errorMessage = document.getElementById('error-message');
         
-        // Hide messages initially
-        successMessage.style.display = 'none';
-        errorMessage.style.display = 'none';
         
         form.addEventListener('submit', function(e) {
           e.preventDefault();
@@ -52,20 +92,20 @@
           })
           .then(response => {
             if (response.ok) {
-              successMessage.style.display = 'block';
-              errorMessage.style.display = 'none';
+              successMessage.classList.remove('hidden');
+              errorMessage.classList.add('hidden');
               
               setTimeout(() => {
                 window.location.href = 'https://c4-diagrams.zu.ca/workspace/diagrams';
               }, 2000);
             } else {
-              errorMessage.style.display = 'block';
-              successMessage.style.display = 'none';
+              errorMessage.classList.remove('hidden');
+              successMessage.classList.add('hidden');
             }
           })
           .catch(error => {
-            errorMessage.style.display = 'block';
-            successMessage.style.display = 'none';
+            errorMessage.classList.remove('hidden');
+            successMessage.classList.add('hidden');
             console.error('Error:', error);
           });
         });
@@ -73,88 +113,3 @@
     </script>
   </body>
 </html>
-
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-  }
-
-  main {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-  }
-
-  div {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  h1 {
-    margin-bottom: 1rem;
-  }
-
-  .instructions {
-    text-align: center;
-    margin-bottom: 1.5rem;
-    max-width: 500px;
-    color: #555;
-  }
-
-  .message {
-    padding: 1rem;
-    border-radius: 0.5rem;
-    margin-bottom: 1.5rem;
-    text-align: center;
-    width: 100%;
-    max-width: 500px;
-  }
-
-  .success-message {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-  }
-
-  .error-message {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-  }
-
-  input {
-    margin-bottom: 1rem;
-  }
-
-  input[type="file"]::file-selector-button {
-    background-color: #4eb4e7;
-    color: white;
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-
-  input[type="file"]::file-selector-button:hover {
-    background-color: #2f96c0;
-  }
-
-  button {
-    padding: 0.5rem 1rem;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-
-  button:hover {
-    background-color: #0056b3;
-  }
-</style>
