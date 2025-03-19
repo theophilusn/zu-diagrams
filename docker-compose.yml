@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   structurizr:
     image: structurizr/lite:latest
@@ -8,7 +6,7 @@ services:
       - structurizr_data:/usr/local/structurizr
     restart: unless-stopped
     labels:
-      - 'traefik.http.middlewares.AKQ2GjoHoE99DGlqSr4ZWd59LX2Y9aP4BTtkRzWA6EtZj3Vh3WClm9LAT7CD1TZS.basicauth.users=zu-diagrams:$2y$05$ZCslO0FxnH504pMmae6xLeMaSM8cSnyvVBajzUpDj46fmO8Jw8kYS'
+      - 'traefik.http.middlewares.AKQ2GjoHoE99DGlqSr4ZWd59LX2Y9aP4BTtkRzWA6EtZj3Vh3WClm9LAT7CD1TZS.basicauth.users=zu-diagrams:${BASIC_AUTH_PASSWORD_HASH}'
 
   uploader:
     build: ./uploader
@@ -16,8 +14,10 @@ services:
     volumes:
       - structurizr_data:/usr/local/structurizr
     restart: unless-stopped
+    environment:
+      - FLASK_SECRET_KEY=${FLASK_SECRET_KEY}
     labels:
-      - 'traefik.http.middlewares.y9pWnyziYURh42Q60gZ1e6TKfkr3B7NSGBhTuFPdA1CT47Mz3NndWfh8JywqRFx0.basicauth.users=zu-diagrams:$2y$05$ZCslO0FxnH504pMmae6xLeMaSM8cSnyvVBajzUpDj46fmO8Jw8kYS'
+      - 'traefik.http.middlewares.y9pWnyziYURh42Q60gZ1e6TKfkr3B7NSGBhTuFPdA1CT47Mz3NndWfh8JywqRFx0.basicauth.users=zu-diagrams:${BASIC_AUTH_PASSWORD_HASH}'
   
 
 volumes:

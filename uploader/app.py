@@ -7,12 +7,13 @@ from flask_wtf.csrf import CSRFProtect
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = '2cFRYkhR3xySNIUBwNxZgEzeLS2CvIqghkqymOH6hdAEGVvslqvngPhc7HufEZGC'
-app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024 
+
+app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'dev-key-change-in-production')
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
+destination = "/usr/local/structurizr"
+
 
 csrf = CSRFProtect(app)
-
-destination = "/usr/local/structurizr"
 
 def is_allowed_file(filename: str)->bool:
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'dsl'}
