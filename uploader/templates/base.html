@@ -29,12 +29,10 @@
             Upload failed. Please try again or check your file format.
           </div>
           
-          <!-- Flask WTF Form -->
           <form id="upload-form" action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
             {{ form.csrf_token }}
             
             <div class="form-group">
-              {{ form.file.label }}
               {{ form.file(accept=".dsl", required=True) }}
               
               {% if form.file.errors %}
@@ -42,9 +40,8 @@
                 <div class="form-error">{{ error }}</div>
                 {% endfor %}
               {% endif %}
+              {{ form.submit(class="submit-btn") }}
             </div>
-            
-            <button type="submit">Upload</button>
           </form>
         </section>
 

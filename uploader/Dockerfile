@@ -9,6 +9,8 @@ COPY . .
 
 RUN chmod -R 755 /uploader
 
+ENV FLASK_SECRET_KEY=dev-key-change-in-production
+
 EXPOSE 5000
 
 CMD ["python3", "app.py"]

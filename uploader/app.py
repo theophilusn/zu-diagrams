@@ -5,13 +5,12 @@ import filecmp
 from flask import Flask, request, redirect, render_template, jsonify, url_for
 from flask_wtf.csrf import CSRFProtect
 from flask_wtf import FlaskForm
-from wtforms import FileField
-from wtforms.validators import FileRequired, ValidationError
-
+from wtforms import FileField, SubmitField
+from wtforms.validators import ValidationError, DataRequired
 
 app = Flask(__name__)
-
-app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'dev-key-change-in-production')
+secret_key = os.environ.get('FLASK_SECRET_KEY', 'dev-key-change-in-production')
+app.secret_key = secret_key if secret_key else 'dev-key-change-in-production'
 app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
 destination = "/usr/local/structurizr"
 
@@ -27,10 +26,10 @@ def validate_dsl_file(form, field: FileField):
     
 class UploadForm(FlaskForm):
     file = FileField('File', validators=[
-        FileRequired(message='Please select a file to upload'),
+        DataRequired(message='Please select a file to upload'),
         validate_dsl_file
     ])
-
+    submit = SubmitField('Upload')
 
 
 def is_allowed_file(filename: str)->bool:

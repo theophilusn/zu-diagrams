@@ -96,7 +96,7 @@ input[type="file"]::file-selector-button {
 input[type="file"]::file-selector-button:hover {
   background-color: var(--secondary-hover);
 }
-
+.submit-btn,
 button {
   padding: 0.5rem 1rem;
   background-color: var(--primary-color);
@@ -107,6 +107,7 @@ button {
   transition: background-color 0.3s;
 }
 
+.submit-btn:hover,
 button:hover {
   background-color: var(--primary-hover);
 }
