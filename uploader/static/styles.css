@@ -147,6 +147,8 @@ button:hover {
 .upload-header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  gap:1rem;
   padding: 0.75rem 1rem;
   background-color: #f8f9fa;
   cursor: pointer;

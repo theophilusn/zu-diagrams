@@ -16,8 +16,9 @@ services:
     restart: unless-stopped
     environment:
       - FLASK_SECRET_KEY=${FLASK_SECRET_KEY}
+      - BASIC_AUTH_PASSWORD_HASH=${BASIC_AUTH_PASSWORD_HASH}
     labels:
-      - 'traefik.http.middlewares.y9pWnyziYURh42Q60gZ1e6TKfkr3B7NSGBhTuFPdA1CT47Mz3NndWfh8JywqRFx0.basicauth.users=zu-diagrams:${BASIC_AUTH_PASSWORD_HASH}'
+      - 'traefik.http.middlewares.y9pWnyziYURh42Q60gZ1e6TKfkr3B7NSGBhTuFPdA1CT47Mz3NndWfh8JywqRFx0.basicauth.users=zu-diagrams:{BASIC_AUTH_PASSWORD_HASH}'
   
 
 volumes:

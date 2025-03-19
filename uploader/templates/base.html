@@ -50,6 +50,7 @@
           {% endif %}
           
           <div class="uploads-list">
+            <small>Click on the file to see a preview.</small>
             {% for filename in previous_uploads %}
             <details class="upload-item {% if file_previews[filename].is_active %}active-file{% endif %}">
               <summary class="upload-header">
